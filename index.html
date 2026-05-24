@@ -321,9 +321,9 @@ body {
         <div class="amount" id="otHoursDisplay">5h</div>
         <div class="label">OT Hours (1.5x)</div>
       </div>
-      <div class="breakdown-item warn">
-        <div class="amount" id="dtHoursDisplay" style="display:none">0h</div>
-        <div class="label" id="dtLabel" style="display:none">Double Time (2x)</div>
+      <div class="breakdown-item warn" id="dtBreakdown" style="display:none">
+        <div class="amount" id="dtHoursDisplay">0h</div>
+        <div class="label" id="dtLabel">Double Time (2x)</div>
       </div>
       <div class="breakdown-item good">
         <div class="amount" id="regPayDisplay">$1,000</div>
@@ -343,7 +343,7 @@ body {
       <h3>Want a detailed pay stub report?</h3>
       <p>Get a printable breakdown with employer-ready formatting. Support this free tool.</p>
       <div class="paywall-buttons">
-        <a href="https://www.paypal.com/paypalme/pinplan" target="_blank" class="btn btn-pay" id="btnPay">Pay $1 — Get Report</a>
+        <a href="https://www.paypal.com/paypalme/pinplan/1" target="_blank" class="btn btn-pay" id="btnPay">Pay $1 — Get Report</a>
         <a href="https://tally.so/r/rjkrJp" target="_blank" class="btn btn-outline" id="btnEmail">Send to Email (Free)</a>
       </div>
     </div>
@@ -425,6 +425,7 @@ const dom = {
   barReg: $('#barReg'), barOt: $('#barOt'), barDt: $('#barDt'),
   regHoursDisplay: $('#regHoursDisplay'),
   otHoursDisplay: $('#otHoursDisplay'),
+  dtBreakdown: $('#dtBreakdown'),
   dtHoursDisplay: $('#dtHoursDisplay'),
   dtLabel: $('#dtLabel'),
   regPayDisplay: $('#regPayDisplay'),
@@ -526,11 +527,9 @@ function render(r) {
   // Double time
   if (r.dtHours > 0) {
     dom.dtHoursDisplay.textContent = fmtH(r.dtHours);
-    dom.dtHoursDisplay.style.display = '';
-    dom.dtLabel.style.display = '';
+    dom.dtBreakdown.style.display = '';
   } else {
-    dom.dtHoursDisplay.style.display = 'none';
-    dom.dtLabel.style.display = 'none';
+    dom.dtBreakdown.style.display = 'none';
   }
 
   // OT label
