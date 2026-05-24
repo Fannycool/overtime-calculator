@@ -340,11 +340,11 @@ body {
     </div>
 
     <div class="paywall-cta">
-      <h3>Want a detailed pay stub report?</h3>
-      <p>Get a printable breakdown with employer-ready formatting. Support this free tool.</p>
+      <h3>Download Your Pay Stub Report</h3>
+      <p>Printable breakdown to check against your actual paycheck. One-click download.</p>
       <div class="paywall-buttons">
-        <a href="https://www.paypal.com/paypalme/pinplan/1" target="_blank" class="btn btn-pay" id="btnPay">Pay $1 — Get Report</a>
-        <a href="https://tally.so/r/lbMlop" target="_blank" class="btn btn-outline" id="btnEmail">Send to Email (Free)</a>
+        <a href="https://www.paypal.com/paypalme/pinplan/1" target="_blank" class="btn btn-pay" id="btnPay">Get Report — $1</a>
+        <a href="https://tally.so/r/lbMlop" target="_blank" class="btn btn-outline" id="btnEmail">Email Me My Results (Free)</a>
       </div>
     </div>
   </div>
@@ -639,6 +639,19 @@ function init() {
 }
 
 init();
+</script>
+<script>
+// Visit tracking
+(function(){
+  var k='pv_overtime_calc',d={total:0,unique:0,first:'',last:''};
+  try{var s=localStorage.getItem(k);if(s)d=JSON.parse(s);}catch(e){}
+  d.total++;
+  var t=new Date().toISOString().split('T')[0];
+  if(d.last!==t){d.unique++;d.last=t;}
+  if(!d.first)d.first=t;
+  try{localStorage.setItem(k,JSON.stringify(d));}catch(e){}
+  console.log('Traffic:',d.total+' total, '+d.unique+' unique days, first:'+d.first);
+})();
 </script>
 </body>
 </html>
