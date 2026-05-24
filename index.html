@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overtime Pay Calculator — Free Time and a Half Calculator (2026)</title>
+<meta name="description" content="Calculate your overtime pay instantly. Includes state-specific overtime rules, double time, and weekly/biweekly pay periods. Free, no ads.">
+<meta property="og:title" content="Overtime Pay Calculator — Free Time and a Half Calculator">
+<meta property="og:description" content="Calculate overtime pay with state-specific rules. Know exactly what your paycheck should be.">
+<meta property="og:type" content="website">
+<style>
+:root {
+  --primary: #059669;
+  --primary-light: #D1FAE5;
+  --primary-dark: #047857;
+  --accent: #F59E0B;
+  --accent-light: #FEF3C7;
+  --danger: #DC2626;
+  --danger-light: #FEE2E2;
+  --bg: #F5F7FA;
+  --card: #FFFFFF;
+  --text: #1E293B;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  --border: #E2E8F0;
+  --border-focus: #6EE7B7;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.container { max-width: 680px; margin: 0 auto; padding: 16px; }
+
+/* Header */
+.header { text-align: center; padding: 28px 16px 20px; }
+.header .logo {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 26px; font-weight: 700; color: var(--primary); letter-spacing: -.5px;
+}
+.header .logo .icon {
+  width: 40px; height: 40px; background: var(--primary); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 20px;
+}
+.header .subtitle {
+  margin-top: 6px; color: var(--text-secondary); font-size: 14px;
+}
+
+/* Cards */
+.card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 24px; margin-bottom: 16px;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.card-header {
+  font-size: 18px; font-weight: 600; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* Form */
+.form-row { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.form-group { flex: 1; min-width: 150px; }
+.form-group label {
+  display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary);
+  margin-bottom: 5px; white-space: nowrap;
+}
+.form-group input, .form-group select {
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 15px; font-family: var(--font);
+  transition: border-color .2s, box-shadow .2s; background: #FAFBFC;
+}
+.form-group input:focus, .form-group select:focus {
+  outline: none; border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(5,150,105,.1); background: #fff;
+}
+.input-prefix { position: relative; }
+.input-prefix .prefix {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--text-muted); font-size: 15px; pointer-events: none;
+}
+.input-prefix input { padding-left: 24px; }
+
+/* Results */
+.results { display: none; }
+.results.show { display: block; }
+.result-hero {
+  text-align: center; padding: 24px 16px;
+  background: linear-gradient(135deg, var(--primary-light), #ECFDF5);
+  border-radius: var(--radius-sm); margin-bottom: 16px;
+}
+.result-hero .total-label { font-size: 14px; color: var(--text-secondary); margin-bottom: 4px; }
+.result-hero .total-amount {
+  font-size: 48px; font-weight: 800; color: var(--primary); line-height: 1.2;
+}
+.result-hero .total-period { font-size: 14px; color: var(--text-muted); }
+.breakdown-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px; margin-bottom: 16px;
+}
+.breakdown-item {
+  text-align: center; padding: 16px 12px;
+  background: var(--bg); border-radius: var(--radius-sm);
+}
+.breakdown-item .amount { font-size: 22px; font-weight: 700; color: var(--text); }
+.breakdown-item .label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.breakdown-item.warn .amount { color: var(--accent); }
+.breakdown-item.good .amount { color: var(--primary); }
+
+.rate-bar {
+  height: 24px; border-radius: 12px; overflow: hidden; display: flex;
+  margin-bottom: 8px; background: #E2E8F0;
+}
+.rate-bar .reg { background: #93C5FD; transition: width .4s; }
+.rate-bar .ot { background: var(--accent); transition: width .4s; }
+.rate-bar .dt { background: var(--danger); transition: width .4s; }
+.rate-legend { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
+.rate-legend span { display: flex; align-items: center; gap: 4px; }
+.rate-legend .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.rate-legend .dot.reg { background: #93C5FD; }
+.rate-legend .dot.ot { background: var(--accent); }
+.rate-legend .dot.dt { background: var(--danger); }
+
+/* State info */
+.state-info {
+  padding: 12px 16px; background: var(--accent-light);
+  border-radius: var(--radius-sm); font-size: 13px;
+  color: #92400E; margin-bottom: 16px; display: none;
+}
+.state-info.show { display: block; }
+
+/* SEO section */
+.seo-section {
+  margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);
+}
+.seo-section h2 { font-size: 18px; margin-bottom: 12px; }
+.seo-section p, .seo-section li { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+.seo-section ul { padding-left: 20px; margin-bottom: 12px; }
+
+/* Paywall */
+.paywall-cta {
+  text-align: center; padding: 20px;
+  background: var(--primary-light); border-radius: var(--radius-sm);
+}
+.paywall-cta h3 { font-size: 18px; margin-bottom: 6px; }
+.paywall-cta p { font-size: 14px; color: var(--text-secondary); margin-bottom: 14px; }
+.paywall-buttons { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 12px 24px; font-size: 15px; font-weight: 600;
+  border: none; border-radius: var(--radius-sm); cursor: pointer;
+  transition: all .2s; font-family: var(--font); text-decoration: none;
+}
+.btn-primary { background: var(--primary); color: #fff; width: 100%; }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-primary:active { transform: translateY(0); }
+.btn-pay { background: #FFC439; color: #1A1A1A; }
+.btn-pay:hover { background: #F5B800; }
+.btn-outline { background: #fff; color: var(--primary); border: 2px solid var(--primary); }
+.btn-outline:hover { background: var(--primary-light); }
+.btn-sm { padding: 8px 16px; font-size: 13px; }
+
+/* Footer */
+.footer {
+  text-align: center; padding: 24px 16px 32px;
+  color: var(--text-muted); font-size: 13px;
+}
+.footer a { color: var(--primary); text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+.lang-link {
+  display: inline-block; font-size: 13px; color: var(--primary);
+  text-decoration: none; padding: 6px 16px;
+  border: 1.5px solid var(--primary); border-radius: 20px;
+  transition: all .2s; margin-top: 8px;
+}
+.lang-link:hover { background: var(--primary); color: #fff; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #1E293B; color: #fff; padding: 12px 24px;
+  border-radius: 20px; font-size: 14px; font-weight: 500;
+  box-shadow: 0 10px 25px rgba(0,0,0,.15); z-index: 999;
+  opacity: 0; transition: opacity .3s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+@media (max-width: 480px) {
+  .container { padding: 8px; }
+  .card { padding: 16px; }
+  .header { padding: 20px 12px 12px; }
+  .header .logo { font-size: 22px; }
+  .form-row { flex-direction: column; gap: 10px; }
+  .result-hero .total-amount { font-size: 36px; }
+}
+@media print {
+  body { background: #fff; }
+  .card { box-shadow: none; border: 1px solid #ddd; }
+  .btn, .paywall-cta, .footer, .seo-section { display: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="header">
+  <div class="logo">
+    <div class="icon">$</div>
+    Overtime Pay Calculator
+  </div>
+  <p class="subtitle">Calculate your paycheck with overtime — state-specific rules, time and a half, double time</p>
+</header>
+
+<main>
+  <div class="card">
+    <div class="card-header">Your Pay Details</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Hourly Rate ($)</label>
+        <div class="input-prefix">
+          <span class="prefix">$</span>
+          <input type="number" id="hourlyRate" value="25" step="0.01" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Pay Period</label>
+        <select id="payPeriod">
+          <option value="weekly">Weekly</option>
+          <option value="biweekly" selected>Bi-Weekly (2 weeks)</option>
+          <option value="monthly">Monthly (4 weeks)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Regular Hours Worked</label>
+        <input type="number" id="regularHours" value="40" step="0.5" min="0">
+      </div>
+      <div class="form-group">
+        <label>Overtime Hours Worked</label>
+        <input type="number" id="overtimeHours" value="5" step="0.5" min="0">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>State (for overtime rules)</label>
+        <select id="state">
+          <option value="federal">Federal (40 hrs/week, 1.5x)</option>
+          <option value="CA">California — OT after 8hrs/day, 2x after 12hrs</option>
+          <option value="AK">Alaska — OT after 8hrs/day or 40hrs/week</option>
+          <option value="NV">Nevada — OT after 8hrs/day or 40hrs/week</option>
+          <option value="CO">Colorado — OT after 12hrs/day or 40hrs/week</option>
+          <option value="PR">Puerto Rico — OT after 8hrs/day, 2x after 12hrs</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Overtime Rate Multiplier</label>
+        <select id="otMultiplier">
+          <option value="1.5" selected>1.5x (Time and a Half)</option>
+          <option value="2.0">2.0x (Double Time)</option>
+          <option value="custom">Custom…</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row" id="customOtRow" style="display:none">
+      <div class="form-group">
+        <label>Custom Overtime Multiplier</label>
+        <input type="number" id="customOt" value="1.5" step="0.1" min="1">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="btnCalculate">Calculate My Pay</button>
+  </div>
+
+  <!-- Results -->
+  <div class="card results" id="resultsCard">
+    <div class="card-header">
+      Your Paycheck Breakdown
+      <button class="btn btn-sm btn-outline" id="btnShare" style="margin-left:auto">Copy Link</button>
+    </div>
+
+    <div class="state-info" id="stateInfo"></div>
+
+    <div class="result-hero">
+      <div class="total-label">Total Gross Pay</div>
+      <div class="total-amount" id="totalPay">$0.00</div>
+      <div class="total-period" id="periodLabel"></div>
+    </div>
+
+    <div class="rate-bar">
+      <div class="reg" id="barReg" style="width:70%"></div>
+      <div class="ot" id="barOt" style="width:20%"></div>
+      <div class="dt" id="barDt" style="width:10%"></div>
+    </div>
+    <div class="rate-legend">
+      <span><span class="dot reg"></span> Regular Pay</span>
+      <span><span class="dot ot"></span> Overtime (1.5x)</span>
+      <span><span class="dot dt"></span> Double Time (2x)</span>
+    </div>
+
+    <div class="breakdown-grid">
+      <div class="breakdown-item">
+        <div class="amount" id="regHoursDisplay">40h</div>
+        <div class="label">Regular Hours</div>
+      </div>
+      <div class="breakdown-item warn">
+        <div class="amount" id="otHoursDisplay">5h</div>
+        <div class="label">OT Hours (1.5x)</div>
+      </div>
+      <div class="breakdown-item warn">
+        <div class="amount" id="dtHoursDisplay" style="display:none">0h</div>
+        <div class="label" id="dtLabel" style="display:none">Double Time (2x)</div>
+      </div>
+      <div class="breakdown-item good">
+        <div class="amount" id="regPayDisplay">$1,000</div>
+        <div class="label">Regular Pay</div>
+      </div>
+      <div class="breakdown-item good">
+        <div class="amount" id="otPayDisplay">$187</div>
+        <div class="label">Overtime Pay</div>
+      </div>
+      <div class="breakdown-item">
+        <div class="amount" id="effectiveRate">$26.04</div>
+        <div class="label">Effective Hourly Rate</div>
+      </div>
+    </div>
+
+    <div class="paywall-cta">
+      <h3>Want a detailed pay stub report?</h3>
+      <p>Get a printable breakdown with employer-ready formatting. Support this free tool.</p>
+      <div class="paywall-buttons">
+        <a href="https://www.paypal.com/paypalme/pinplan" target="_blank" class="btn btn-pay" id="btnPay">Pay $1 — Get Report</a>
+        <a href="https://tally.so/r/rjkrJp" target="_blank" class="btn btn-outline" id="btnEmail">Send to Email (Free)</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEO Content -->
+  <div class="card seo-section">
+    <h2>How Overtime Pay Works</h2>
+    <p>Under the federal <strong>Fair Labor Standards Act (FLSA)</strong>, non-exempt employees must receive overtime pay at a rate of <strong>1.5 times their regular hourly rate</strong> for any hours worked beyond 40 in a workweek. Some states have additional protections:</p>
+    <ul>
+      <li><strong>California:</strong> Overtime (1.5x) for hours beyond 8 in a day or 40 in a week. Double time (2x) for hours beyond 12 in a day.</li>
+      <li><strong>Alaska & Nevada:</strong> Daily overtime after 8 hours, plus weekly overtime after 40 hours.</li>
+      <li><strong>Colorado:</strong> Overtime after 12 hours in a day or 40 hours in a week.</li>
+      <li><strong>Puerto Rico:</strong> Double time after 12 hours in a day.</li>
+    </ul>
+    <p>This calculator helps you estimate your gross (pre-tax) pay including overtime. Enter your hourly rate, hours worked, and select your state to see state-specific overtime rules.</p>
+
+    <h2>Frequently Asked Questions</h2>
+    <p><strong>What is time and a half?</strong><br>Time and a half means 1.5 times your regular hourly rate. If you make $20/hour, your overtime rate is $30/hour.</p>
+    <p><strong>Who qualifies for overtime pay?</strong><br>Most hourly (non-exempt) workers qualify. Salaried exempt employees generally do not, unless their salary is below the FLSA threshold.</p>
+    <p><strong>Is overtime calculated daily or weekly?</strong><br>Federal law uses a weekly standard (40 hours). Some states like California use both daily (8 hours) and weekly (40 hours) standards — whichever results in more overtime pay for the worker applies.</p>
+  </div>
+</main>
+
+<footer class="footer">
+  <p>Overtime Pay Calculator &copy; 2026 &middot; Free, no ads &middot; For estimation only — check your pay stub</p>
+  <p><a href="#" id="btnReset">Reset</a> &middot; <a href="https://fannycool.github.io/injection-calculator/">PinPlan Injection Calculator</a></p>
+  <a class="lang-link" href="#">中文版 coming soon</a>
+</footer>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ===== STATE RULES =====
+const STATE_RULES = {
+  federal: {
+    name: 'Federal (FLSA)', weeklyOT: 40, dailyOT: null, dailyDouble: null,
+    info: 'Federal law: 1.5x overtime after 40 hours in a workweek. No daily overtime limit.'
+  },
+  CA: {
+    name: 'California', weeklyOT: 40, dailyOT: 8, dailyDouble: 12,
+    info: 'California: 1.5x after 8 hours/day OR 40 hours/week. 2x double time after 12 hours/day. Whichever gives the worker more pay applies.'
+  },
+  AK: {
+    name: 'Alaska', weeklyOT: 40, dailyOT: 8, dailyDouble: null,
+    info: 'Alaska: 1.5x after 8 hours/day OR 40 hours/week.'
+  },
+  NV: {
+    name: 'Nevada', weeklyOT: 40, dailyOT: 8, dailyDouble: null,
+    info: 'Nevada: 1.5x after 8 hours/day OR 40 hours/week (for employees earning less than 1.5x minimum wage).'
+  },
+  CO: {
+    name: 'Colorado', weeklyOT: 40, dailyOT: 12, dailyDouble: null,
+    info: 'Colorado: 1.5x after 12 hours/day OR 40 hours/week.'
+  },
+  PR: {
+    name: 'Puerto Rico', weeklyOT: 40, dailyOT: 8, dailyDouble: 12,
+    info: 'Puerto Rico: 1.5x after 8 hours/day OR 40 hours/week. 2x double time after 12 hours/day.'
+  }
+};
+
+// ===== DOM =====
+const $ = (s) => document.querySelector(s);
+const dom = {
+  hourlyRate: $('#hourlyRate'),
+  payPeriod: $('#payPeriod'),
+  regularHours: $('#regularHours'),
+  overtimeHours: $('#overtimeHours'),
+  state: $('#state'),
+  otMultiplier: $('#otMultiplier'),
+  customOt: $('#customOt'),
+  customOtRow: $('#customOtRow'),
+  btnCalculate: $('#btnCalculate'),
+  resultsCard: $('#resultsCard'),
+  stateInfo: $('#stateInfo'),
+  totalPay: $('#totalPay'),
+  periodLabel: $('#periodLabel'),
+  barReg: $('#barReg'), barOt: $('#barOt'), barDt: $('#barDt'),
+  regHoursDisplay: $('#regHoursDisplay'),
+  otHoursDisplay: $('#otHoursDisplay'),
+  dtHoursDisplay: $('#dtHoursDisplay'),
+  dtLabel: $('#dtLabel'),
+  regPayDisplay: $('#regPayDisplay'),
+  otPayDisplay: $('#otPayDisplay'),
+  effectiveRate: $('#effectiveRate'),
+  btnShare: $('#btnShare'),
+  btnReset: $('#btnReset'),
+  toast: $('#toast')
+};
+
+// ===== HELPERS =====
+function fmt(dollars) { return '$' + dollars.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function fmtH(hours) { return hours % 1 === 0 ? hours + 'h' : hours.toFixed(1) + 'h'; }
+
+function getMultiplier() {
+  if (dom.otMultiplier.value === 'custom') return parseFloat(dom.customOt.value) || 1.5;
+  return parseFloat(dom.otMultiplier.value);
+}
+
+function getPeriodMult() {
+  switch (dom.payPeriod.value) {
+    case 'biweekly': return 2;
+    case 'monthly': return 4;
+    default: return 1;
+  }
+}
+
+function getPeriodLabel() {
+  switch (dom.payPeriod.value) {
+    case 'biweekly': return 'per 2-week period';
+    case 'monthly': return 'per 4-week month';
+    default: return 'per week';
+  }
+}
+
+// ===== CALCULATION =====
+function calculate() {
+  const rate = parseFloat(dom.hourlyRate.value) || 0;
+  const regHours = parseFloat(dom.regularHours.value) || 0;
+  const otHours = parseFloat(dom.overtimeHours.value) || 0;
+  const otMult = getMultiplier();
+  const periodMult = getPeriodMult();
+  const rules = STATE_RULES[dom.state.value] || STATE_RULES.federal;
+
+  const totalRegHours = regHours * periodMult;
+  const totalOtHours = otHours * periodMult;
+
+  const regPay = totalRegHours * rate;
+  const otPay = totalOtHours * rate * otMult;
+  const totalPay = regPay + otPay;
+
+  // Double time: if state has daily double and user might hit it
+  let dtHours = 0;
+  let dtPay = 0;
+  if (rules.dailyDouble && otMult >= 1.5) {
+    // Estimate: if otHours is large relative to days worked, some might be double time
+    // Simplified: if user selected dailyDouble state and overtime > some threshold
+    const workDays = periodMult * 5;
+    const hoursPerDay = regHours / (periodMult * 5);
+    if (hoursPerDay > (rules.dailyDouble || 99)) {
+      dtHours = Math.max(0, (hoursPerDay - (rules.dailyDouble || 99)) * workDays) * periodMult;
+    }
+  }
+
+  const totalHours = totalRegHours + totalOtHours;
+  const effectiveRateVal = totalHours > 0 ? totalPay / totalHours : rate;
+
+  return {
+    rate, regHours: totalRegHours, otHours: totalOtHours, dtHours,
+    regPay, otPay: otPay - dtPay, dtPay,
+    totalPay, totalHours, effectiveRateVal,
+    otMult, periodMult, rules
+  };
+}
+
+// ===== RENDER =====
+function render(r) {
+  dom.stateInfo.textContent = r.rules.info;
+  dom.stateInfo.classList.add('show');
+
+  dom.totalPay.textContent = fmt(r.totalPay);
+  dom.periodLabel.textContent = getPeriodLabel();
+
+  // Bar
+  const regPct = r.totalPay > 0 ? (r.regPay / r.totalPay * 100) : 70;
+  const otPct = r.totalPay > 0 ? (r.otPay / r.totalPay * 100) : 20;
+  const dtPct = r.totalPay > 0 ? (r.dtPay / r.totalPay * 100) : 10;
+  dom.barReg.style.width = regPct + '%';
+  dom.barOt.style.width = otPct + '%';
+  dom.barDt.style.width = dtPct + '%';
+
+  // Breakdown
+  dom.regHoursDisplay.textContent = fmtH(r.regHours);
+  dom.otHoursDisplay.textContent = fmtH(r.otHours);
+  dom.regPayDisplay.textContent = fmt(r.regPay);
+  dom.otPayDisplay.textContent = fmt(r.otPay);
+  dom.effectiveRate.textContent = fmt(r.effectiveRateVal) + '/hr';
+
+  // Double time
+  if (r.dtHours > 0) {
+    dom.dtHoursDisplay.textContent = fmtH(r.dtHours);
+    dom.dtHoursDisplay.style.display = '';
+    dom.dtLabel.style.display = '';
+  } else {
+    dom.dtHoursDisplay.style.display = 'none';
+    dom.dtLabel.style.display = 'none';
+  }
+
+  // OT label
+  const otLabelEl = dom.otHoursDisplay.nextElementSibling;
+  if (otLabelEl) {
+    otLabelEl.textContent = r.otMult === 2.0 ? 'Overtime Hours (2x)' : 'OT Hours (' + r.otMult + 'x)';
+  }
+
+  dom.resultsCard.classList.add('show');
+  dom.resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Update URL
+  updateURL(r);
+}
+
+// ===== URL PARAMS (shareable) =====
+function updateURL(r) {
+  const params = new URLSearchParams();
+  params.set('rate', r.rate);
+  params.set('period', dom.payPeriod.value);
+  params.set('reg', r.regHours / r.periodMult);
+  params.set('ot', r.otHours / r.periodMult);
+  params.set('state', dom.state.value);
+  params.set('mult', r.otMult);
+  const url = location.pathname + '?' + params.toString();
+  window.history.replaceState({}, '', url);
+}
+
+function loadFromURL() {
+  const params = new URLSearchParams(location.search);
+  if (!params.has('rate')) return false;
+  dom.hourlyRate.value = params.get('rate') || 25;
+  dom.payPeriod.value = params.get('period') || 'biweekly';
+  dom.regularHours.value = params.get('reg') || 40;
+  dom.overtimeHours.value = params.get('ot') || 5;
+  dom.state.value = params.get('state') || 'federal';
+  const mult = params.get('mult') || '1.5';
+  if (mult === '2.0') dom.otMultiplier.value = '2.0';
+  else if (mult === '1.5') dom.otMultiplier.value = '1.5';
+  else { dom.otMultiplier.value = 'custom'; dom.customOt.value = mult; toggleCustom(); }
+  return true;
+}
+
+// ===== EVENTS =====
+function toggleCustom() {
+  dom.customOtRow.style.display = dom.otMultiplier.value === 'custom' ? '' : 'none';
+}
+
+function handleCalculate() {
+  const rate = parseFloat(dom.hourlyRate.value);
+  if (!rate || rate <= 0) { showToast('Please enter a valid hourly rate'); return; }
+  const r = calculate();
+  render(r);
+}
+
+function handleShare() {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('Link copied! Share it with anyone.');
+  }).catch(() => {
+    showToast('Copy this URL: ' + url);
+  });
+}
+
+function handleReset() {
+  dom.resultsCard.classList.remove('show');
+  dom.hourlyRate.value = 25;
+  dom.payPeriod.value = 'biweekly';
+  dom.regularHours.value = 40;
+  dom.overtimeHours.value = 5;
+  dom.state.value = 'federal';
+  dom.otMultiplier.value = '1.5';
+  dom.customOt.value = '1.5';
+  dom.customOtRow.style.display = 'none';
+  window.history.replaceState({}, '', location.pathname);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== TOAST =====
+let toastTimer;
+function showToast(msg) {
+  dom.toast.textContent = msg;
+  dom.toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => dom.toast.classList.remove('show'), 2000);
+}
+
+// ===== INIT =====
+function init() {
+  dom.btnCalculate.addEventListener('click', handleCalculate);
+  dom.otMultiplier.addEventListener('change', toggleCustom);
+  dom.btnShare.addEventListener('click', handleShare);
+  dom.btnReset.addEventListener('click', handleReset);
+
+  // Load from URL if shared
+  if (loadFromURL()) {
+    handleCalculate();
+  }
+
+  // Enter key triggers calculate
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && document.activeElement && document.activeElement.closest('.card')) {
+      e.preventDefault();
+      handleCalculate();
+    }
+  });
+}
+
+init();
+</script>
+</body>
+</html>
